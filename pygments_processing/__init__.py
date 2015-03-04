@@ -26,6 +26,7 @@ class ProcessingLexer(JavaLexer):
     """
     name = 'Processing'
     aliases = ['processing', 'pde']
+    filenames = ['*.pde']
     tokens = {'root': JavaLexer.tokens['root'] + [(r'#[A-Fa-f0-9]{6}', Number.Color)],
               'class': JavaLexer.tokens['class'],
               'import': JavaLexer.tokens['import'],
