@@ -14,10 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from pygments.lexer import bygroups, inherit
 from pygments.lexers.jvm import JavaLexer
 from pygments.style import Style
 from pygments.token import Keyword, Name, Comment, String, Error, \
-    Number, Operator, Generic
+    Number, Operator, Generic, Text
 
 class ProcessingLexer(JavaLexer):
     """
@@ -27,10 +28,7 @@ class ProcessingLexer(JavaLexer):
     name = 'Processing'
     aliases = ['processing', 'pde']
     filenames = ['*.pde']
-    tokens = {'root': JavaLexer.tokens['root'] + [(r'#[A-Fa-f0-9]{6}', Number.Color)],
-              'class': JavaLexer.tokens['class'],
-              'import': JavaLexer.tokens['import'],
-    }
+    tokens = {'root': [(r'#[A-Fa-f0-9]{6}', Number.Color), inherit]}
               
     PROCESSING_BUILTINS = [
         'draw',
@@ -96,18 +94,36 @@ class ProcessingLexer(JavaLexer):
         'noFill',
         'noStroke',
         'stroke',
+        'size',
     ]
 
     def get_tokens_unprocessed(self, text):
+        suspended = []
         for index, token, value in super(JavaLexer, self).get_tokens_unprocessed(text):
-            if token in Name:
+            if len(suspended) > 0:
+                suspended.append((index, token, value))
+                if token in Text:
+                    continue
+                suspended.append
+                if value == "(":
+                    i, t, v = suspended[0]
+                    suspended[0] = (i, Name.Function.Library, v)
+                for item in suspended:
+                    yield item
+                suspended = []
+            elif token in Name:
                 if value in self.PROCESSING_BUILTINS:
                     if token in Name.Function:
                         yield index, Name.Function.Builtin, value
                     else:
                         yield index, Name.Variable.Builtin, value
-                elif value in self.PROCESSING_LIBRARY and token in Name.Function:
-                    yield index, Name.Function.Library, value
+                elif value in self.PROCESSING_LIBRARY:
+                    if token in Name.Function:
+                        yield index, Name.Function.Library, value
+                    elif token in Name:
+                        suspended.append((index, token, value))
+                        continue
+                    yield index, token, value
                 elif value in self.PROCESSING_CONSTANTS:
                     yield index, Name.Variable.Constant, value
                 elif value in self.PROCESSING_TYPES:
