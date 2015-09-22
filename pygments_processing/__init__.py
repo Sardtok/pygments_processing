@@ -48,6 +48,8 @@ class ProcessingLexer(JavaLexer):
         'keyPressed',
         'keReleased',
         'keyTyped',
+        'width',
+        'height',
     ]
 
     PROCESSING_TYPES = [
@@ -95,6 +97,7 @@ class ProcessingLexer(JavaLexer):
         'noStroke',
         'stroke',
         'size',
+        'rect',
     ]
 
     def get_tokens_unprocessed(self, text):
@@ -139,8 +142,7 @@ class ProcessingStyle(Style):
     """
     A style made to resemble the processing IDE's style.
     """
-    
-    default_style = ''
+    default_style = '#000'
 
     styles = {
         Name.Variable.Builtin: '#d94a7a',
